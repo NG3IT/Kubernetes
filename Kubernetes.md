@@ -32,9 +32,9 @@ Vagrant.configure("2") do |config|
 
     kub.vm.provider :virtualbox do |v|
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-      v.customize ["modifyvm", :id, "--memory", 1024]
+      v.customize ["modifyvm", :id, "--memory", 2048]
       v.customize ["modifyvm", :id, "--name", "kmaster"]
-      v.customize ["modifyvm", :id, "--cpus", "1"]
+      v.customize ["modifyvm", :id, "--cpus", "2"]
     end
   end
 
@@ -46,28 +46,15 @@ Vagrant.configure("2") do |config|
     knode.vm.network :private_network, ip: "10.10.1.102"
     knode.vm.provider :virtualbox do |v|
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-      v.customize ["modifyvm", :id, "--memory", 1024]
+      v.customize ["modifyvm", :id, "--memory", 2048]
       v.customize ["modifyvm", :id, "--name", "knode1"]
-      v.customize ["modifyvm", :id, "--cpus", "1"]
-    end
-  end
-  config.vm.define "knode2" do |knode|
-    knode.vm.box = "bento/ubuntu-22.04"
-    knode.vm.hostname = 'knode2'
-    knode.vm.provision "docker"
-    knode.vm.box_url = "bento/ubuntu-22.04"
-    knode.vm.network :private_network, ip: "10.10.1.103"
-    knode.vm.provider :virtualbox do |v|
-      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-      v.customize ["modifyvm", :id, "--memory", 1024]
-      v.customize ["modifyvm", :id, "--name", "knode2"]
-      v.customize ["modifyvm", :id, "--cpus", "1"]
+      v.customize ["modifyvm", :id, "--cpus", "2"]
     end
   end
 end
 ```
 
-Installation du pré-requis **Docker**
+Installation du pré-requis **Docker** (si pas de containerd)
 
 ```
 curl -fsSL https://get.docker.com | sh;
@@ -150,13 +137,13 @@ Mise en place du **réseau interne (Flannel)**
 sysctl net.bridge.bridge-nf-call-iptables=1
 
 # Application du fichier de configuration
-kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/a70459be0084506e4ec919aa1c114638878db11b/Documentation/kube-flannel.yml
+kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
 ```
 
 Vérification de l'états des pods system
 
 ```
-kubectl get pods --all-namespace
+kubectl get pods --all-namespaces
 kubectl get nodes
 ```
 
@@ -165,6 +152,9 @@ kubectl get nodes
 ---
 
 ## 3. Troubleshoot
+
+**⚠️ Attention ⚠️
+Les 2 erreurs ci-dessous sont liés à un sous-dimensionnement du master K8s. Il est possible de bypassé cette restriction, cependant, le cluster risque de ne pas fonctionner par la suite avec des pods en status "CrashLoopBackOff" par exemple**
 
 3.1 ERROR NumCPU
 
@@ -244,3 +234,10 @@ lsmod | grep br_netfilter
 
 ---
 
+3.5 Pod en status "CrashLoopBackOff"
+
+Lorsque l'on liste les pods de tous les namespaces par exemple, on constate un pod en status "CrashLoopBackOff"
+
+```
+kube-system    kube-controller-manager-kmaster   0/1     CrashLoopBackOff   17 (60s ago)     156m
+```
