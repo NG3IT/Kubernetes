@@ -17,9 +17,9 @@
 
 Pour déployer rapidement et simplement un homelab K8s avec plusieurs nodes, on peut utiliser Vagrant.
 
-```txt
-# Fichier **Vagrant**
+Fichier **Vagrant**
 
+```txt
 Vagrant.configure("2") do |config|
   config.vm.define "kmaster" do |kub|
     kub.vm.box = "bento/ubuntu-22.04"
