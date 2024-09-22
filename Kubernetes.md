@@ -92,15 +92,30 @@ systemctl daemon-reload && systemctl restart docker
 Désactivation du **swap**
 
 ```
+# Swap -> OFF
 swapoff -a
 
+# Désactivation du point de montage de la SWAP
+vim /etc/fstab
+#/swap.img      none    swap    sw      0       0
 ```
 
-Installation du **repo Kubernetes**
+Ajout du **repo Kubernetes**
 
 ```
-apt-get update && apt-get install -y apt-transport-https curl
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-sudo add-apt-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo apt update
 ```
 
+Installation des **binaires K8s**
+
+```
+sudo apt-get install -y kubelet kubeadm kubectl kubernetes-cni
+```
+
+Lancement au démarrage de kubelet
+
+```
+systemctl enable kubelet
+```
