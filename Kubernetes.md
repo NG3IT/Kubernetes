@@ -7,7 +7,8 @@
 ## Sommaire
 
 1. Déploiement du homelab
-2. 
+2. Installation et configuration de Kubernetes
+3. Troubleshooting
 
 <br>
 
@@ -100,6 +101,13 @@ vim /etc/fstab
 #/swap.img      none    swap    sw      0       0
 ```
 
+
+<br>
+
+--- 
+
+## Installation et configuration de Kubernetes 🔧
+
 Ajout du **repo Kubernetes**
 
 ```
@@ -114,8 +122,125 @@ Installation des **binaires K8s**
 sudo apt-get install -y kubelet kubeadm kubectl kubernetes-cni
 ```
 
-Lancement au démarrage de kubelet
+Lancement au **démarrage du service kubelet**
 
 ```
 systemctl enable kubelet
 ```
+
+Initilisation du **réseau de Kubernetes** depuis le **master**
+
+```
+kubeadm init --apiserver-advertise-address=<ip_master_k8s> --node-name $HOSTNAME --pod-network-cidr=10.244.0.0/16
+kubeadm init --apiserver-advertise-address=10.10.1.101 --node-name $HOSTNAME --pod-network-cidr=10.244.0.0/16
+```
+
+Création du **fichier de configuraiton** de Kubernetes
+
+```
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.cnf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+```
+
+Mise en place du **réseau interne (Flannel)**
+
+```
+# Ajout du pod de gestion du réseau interne
+sysctl net.bridge.bridge-nf-call-iptables=1
+
+# Application du fichier de configuration
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/a70459be0084506e4ec919aa1c114638878db11b/Documentation/kube-flannel.yml
+```
+
+Vérification de l'états des pods system
+
+```
+kubectl get pods --all-namespace
+kubectl get nodes
+```
+
+<br>
+
+---
+
+## 3. Troubleshoot
+
+3.1 ERROR NumCPU
+
+**ERROR NumCPU** au moment de l'initialisation du master -> Pour fonctionner correctement Kubernetes a besoin de tourner sur un serveur qui dispose d'au moins deux vCPU.
+
+```
+[ERROR NumCPU]: the number of available CPUs 1 is less than the required 2
+```
+
+**Solution 1** -> Modifier la configuration matériel pour avoir le nombre de vCPU requis
+
+**Solution 2** -> Ignorer l'erreur. **A ne pas faire dans un environnement de production**
+
+```
+# Ajout du flag --ignore-preflight-errors=NumCPU
+kubeadm init --apiserver-advertise-address=10.10.1.101 --node-name $HOSTNAME --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=NumCPU
+```
+
+---
+
+3.2 ERROR Mem
+
+**ERROR Mem** au moment de l'initialisation du master -> Pour fonctionner correctement Kubernetes a besoin de tourner sur un serveur qui dispose d'au moins deux Go de RAM.
+
+```
+[ERROR Mem]: the system RAM (957 MB) is less than the minimum 1700 MB
+```
+
+**Solution 1** -> Modifier la configuration matériel pour avoir le nombre de RAM requis
+
+**Solution 2** -> Ignorer l'erreur. **A ne pas faire dans un environnement de production**
+
+```
+# Ajout du flag --ignore-preflight-errors=Mem
+kubeadm init --apiserver-advertise-address=10.10.1.101 --node-name $HOSTNAME --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=Mem
+```
+
+---
+
+3.3 ERROR CRI
+
+**ERROR Mem** au moment de l'initialisation du master -> Pour fonctionner correctement Kubernetes a besoin d'un élément qui va géré les container (Container Runtime Interface).
+
+```
+[ERROR CRI]: container runtime is not running
+```
+
+**Solution 1** -> Modifier la configuration de containerd (dans le cas d'un Ubuntu supérieur à la version 22.04) 
+
+```
+# Désactivation des "disabled_plugins"
+vim /etc/containerd/config.toml
+#disabled_plugins = ["cri"]
+
+sudo systemctl restart containerd 
+```
+
+---
+
+3.4 sysctl: cannot stat /proc/sys/net/bridge/bridge-nf-call-iptables
+
+Au moment de l'activation du filtrage des paquets bridge via iptables, il est possible d'avoir cette erreur :
+
+```
+sysctl: cannot stat /proc/sys/net/bridge/bridge-nf-call-iptables: No such file or directory
+```
+
+Cette erreur est probablement du au fait que le module "br_netfilter" n'est pas chargé au niveau du noyau.
+
+```
+# Activatgion du module br_netfilter
+sudo modprobe br_netfilter
+
+# Vérification du chargement du module
+lsmod | grep br_netfilter
+```
+
+---
+
