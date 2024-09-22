@@ -18,7 +18,7 @@
 Pour déployer rapidement et simplement un homelab K8s avec plusieurs nodes, on peut utiliser Vagrant.
 
 ```txt
-# Fichier Vagrant
+# Fichier **Vagrant**
 
 Vagrant.configure("2") do |config|
   config.vm.define "kmaster" do |kub|
@@ -42,9 +42,7 @@ Vagrant.configure("2") do |config|
     knode.vm.hostname = 'knode'
     knode.vm.provision "docker"
     knode.vm.box_url = "bento/ubuntu-22.04"
-
     knode.vm.network :private_network, ip: "10.10.1.2"
-
     knode.vm.provider :virtualbox do |v|
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       v.customize ["modifyvm", :id, "--memory", 1024]
@@ -68,7 +66,7 @@ Vagrant.configure("2") do |config|
 end
 ```
 
-Installation du pré-requis Docker
+Installation du pré-requis **Docker**
 
 ```
 curl -fsSL https://get.docker.com | sh;
@@ -90,3 +88,19 @@ echo "
 
 systemctl daemon-reload && systemctl restart docker
 ```
+
+Désactivation du **swap**
+
+```
+swapoff -a
+
+```
+
+Installation du **repo Kubernetes**
+
+```
+apt-get update && apt-get install -y apt-transport-https curl
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+sudo add-apt-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+```
+
