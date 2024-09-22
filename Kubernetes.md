@@ -1,0 +1,69 @@
+# Kubernetes 🛞
+
+<br>
+
+---
+
+## Sommaire
+
+1. Déploiement du homelab
+2. 
+
+<br>
+
+---
+
+## Déploiement du homelab
+
+Pour déployer rapidement et simplement un homelab K8s avec plusieurs nodes, on peut utiliser Vagrant.
+
+```txt
+# Fichier Vagrant
+
+Vagrant.configure("2") do |config|
+  config.vm.define "kmaster" do |kub|
+    kub.vm.box = "bento/ubuntu-22.04"
+    kub.vm.hostname = 'kmaster'
+    kub.vm.provision "docker"
+    kub.vm.box_url = "bento/ubuntu-22.04"
+
+    kub.vm.network :private_network, ip: "10.10.1.1"
+
+    kub.vm.provider :virtualbox do |v|
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--memory", 1024]
+      v.customize ["modifyvm", :id, "--name", "kmaster"]
+      v.customize ["modifyvm", :id, "--cpus", "1"]
+    end
+  end
+
+  config.vm.define "knode" do |knode|
+    knode.vm.box = "bento/ubuntu-22.04"
+    knode.vm.hostname = 'knode'
+    knode.vm.provision "docker"
+    knode.vm.box_url = "bento/ubuntu-22.04"
+
+    knode.vm.network :private_network, ip: "10.10.1.2"
+
+    knode.vm.provider :virtualbox do |v|
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--memory", 1024]
+      v.customize ["modifyvm", :id, "--name", "knode"]
+      v.customize ["modifyvm", :id, "--cpus", "1"]
+    end
+  end
+  config.vm.define "knode2" do |knode|
+    knode.vm.box = "bento/ubuntu-22.04"
+    knode.vm.hostname = 'knode2'
+    knode.vm.provision "docker"
+    knode.vm.box_url = "bento/ubuntu-22.04"
+    knode.vm.network :private_network, ip: "10.10.1.3"
+    knode.vm.provider :virtualbox do |v|
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--memory", 1024]
+      v.customize ["modifyvm", :id, "--name", "knode2"]
+      v.customize ["modifyvm", :id, "--cpus", "1"]
+    end
+  end
+end
+```
