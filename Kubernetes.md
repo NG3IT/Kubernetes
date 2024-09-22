@@ -27,7 +27,7 @@ Vagrant.configure("2") do |config|
     kub.vm.provision "docker"
     kub.vm.box_url = "bento/ubuntu-22.04"
 
-    kub.vm.network :private_network, ip: "10.10.1.1"
+    kub.vm.network :private_network, ip: "10.10.1.101"
 
     kub.vm.provider :virtualbox do |v|
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
@@ -42,7 +42,7 @@ Vagrant.configure("2") do |config|
     knode.vm.hostname = 'knode'
     knode.vm.provision "docker"
     knode.vm.box_url = "bento/ubuntu-22.04"
-    knode.vm.network :private_network, ip: "10.10.1.2"
+    knode.vm.network :private_network, ip: "10.10.1.102"
     knode.vm.provider :virtualbox do |v|
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       v.customize ["modifyvm", :id, "--memory", 1024]
@@ -55,7 +55,7 @@ Vagrant.configure("2") do |config|
     knode.vm.hostname = 'knode2'
     knode.vm.provision "docker"
     knode.vm.box_url = "bento/ubuntu-22.04"
-    knode.vm.network :private_network, ip: "10.10.1.3"
+    knode.vm.network :private_network, ip: "10.10.1.103"
     knode.vm.provider :virtualbox do |v|
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       v.customize ["modifyvm", :id, "--memory", 1024]
