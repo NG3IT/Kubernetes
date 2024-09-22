@@ -37,16 +37,16 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  config.vm.define "knode" do |knode|
+  config.vm.define "knode1" do |knode|
     knode.vm.box = "bento/ubuntu-22.04"
-    knode.vm.hostname = 'knode'
+    knode.vm.hostname = 'knode1'
     knode.vm.provision "docker"
     knode.vm.box_url = "bento/ubuntu-22.04"
     knode.vm.network :private_network, ip: "10.10.1.102"
     knode.vm.provider :virtualbox do |v|
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       v.customize ["modifyvm", :id, "--memory", 1024]
-      v.customize ["modifyvm", :id, "--name", "knode"]
+      v.customize ["modifyvm", :id, "--name", "knode1"]
       v.customize ["modifyvm", :id, "--cpus", "1"]
     end
   end
