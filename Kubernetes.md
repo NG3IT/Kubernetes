@@ -9,6 +9,7 @@
 1. Déploiement du homelab
 2. Installation et configuration de Kubernetes
 3. K8S via le shell
+
 X. Troubleshooting
 
 <br>
