@@ -8,7 +8,8 @@
 
 1. Déploiement du homelab
 2. Installation et configuration de Kubernetes
-3. Troubleshooting
+3. K8S via le shell
+X. Troubleshooting
 
 <br>
 
@@ -149,7 +150,20 @@ kubectl get nodes
 
 ---
 
-## 3. Troubleshoot
+## 3. K8S via le shell
+
+Lancer un pod et se connecter à son shell avec bash par exemple
+
+```bash
+kubectl run shell -it --image busybox -- sh
+```
+
+
+<br>
+
+---
+
+## X. Troubleshoot
 
 **⚠️ Attention ⚠️
 Les 2 erreurs ci-dessous sont liés à un sous-dimensionnement du master K8s. Il est possible de bypassé cette restriction, cependant, le cluster risque de ne pas fonctionner par la suite avec des pods en status "CrashLoopBackOff" par exemple**
@@ -239,3 +253,11 @@ Lorsque l'on liste les pods de tous les namespaces par exemple, on constate un p
 ```
 kube-system    kube-controller-manager-kmaster   0/1     CrashLoopBackOff   17 (60s ago)     156m
 ```
+
+<br>
+
+---
+
+## Ressources
+
+Installation du cluster K8S -> https://phoenixnap.com/kb/install-kubernetes-on-ubuntu
